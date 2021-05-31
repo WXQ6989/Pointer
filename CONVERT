@@ -1,0 +1,24 @@
+RAHH = int(Ra_Cal / 15);
+if (Ra_Cal<0) {
+   RAHH = int((Ra_Cal + 360) / 15);
+}
+RAHH_Cal = int(RAHH);
+RAMM = (RAHH - RAHH_Cal) * 60;
+RAMM_Cal = int (RAMM);
+DECSS = int((RAMM - RAMM_Cal) * 60);
+
+int DECDeg_Cal = int(DEC_Cal);
+int DECMM_Cal = int((DEC_Cal-DECDeg_Cal)*60);
+int DECSS_Cal = (DEC_Cal-DECDeg_Cal-DECMM_Cal/60)*60;
+
+
+
+RAHH_Cal = Ra_Cal/15;
+RAMM_Cal = ((Ra_Cal-(RAHH_Cal*15))*60)/15;
+int RASS_Cal = ((Ra_Cal-(RAHH_Cal*15 + (RAMM_Cal*15)/60))*3600)/15;
+int DECDeg_Cal = int(DEC_Cal);
+int DECMM_Cal = int((DEC_Cal-DECDeg_Cal)*60);
+int DECSS_Cal = (DEC_Cal-DECDeg_Cal-DECMM_Cal/60)*3600;
+(DEC_Cal < 0) ? signDEC = 45 : signDEC = 43;
+sprintf(txRA, "%02d:%02d:%02d#", RAHH_Cal,RAMM_Cal,RASS_Cal);
+sprintf(txDEC, "%c%02d%c%02d:%02d#", signDEC, DECDeg_Cal, 223, DECMM_Cal, DECSS_Cal);
