@@ -1,0 +1,35 @@
+void altaz2decra(){
+  // dec to HMS
+  if (DEC_Cal < 0){
+   DEC_Cal1 = abs(DEC_Cal);
+  }else if (DEC_Cal >= 0){
+   DEC_Cal1 = DEC_Cal;
+  }
+  DECDeg_Cal = DEC_Cal1;
+  DECMM_Cal = (DEC_Cal1 - int(DECDeg_Cal)) * 60;
+  DECSS_Cal = (DECMM_Cal-int(DECMM_Cal))*60;
+  //(DEC_Cal < 0) ? sign = 45 : sign = 43;
+  oled.setCursor(0, 7);
+  oled.print("DEC:");
+  oled.print(int(DECDeg_Cal));
+  oled.print('/');
+  oled.print((DECMM_Cal));
+  oled.print('/');
+  oled.print(DECSS_Cal);
+// RA calculation
+  if (Ra_Cal < 0){
+   Ra_Cal1 = Ra_Cal + 360;
+  }else if (DEC_Cal >= 0){
+   Ra_Cal1 = Ra_Cal;
+  }
+  RAHH_Cal = int(Ra_Cal1/15);
+  RAMM_Cal = ((Ra_Cal1-int(RAHH_Cal*15))*60)/15;
+  RASS_Cal = ((RAMM_Cal - int(RAMM_Cal))*60)/15;
+  //oled.setCursor(0, 7);
+  //oled.print("RA:");
+  //oled.print(int(RAHH_Cal));
+ // oled.print('/');
+  //oled.print((RAMM_Cal));
+  //oled.print('/');
+  //oled.print(RASS_Cal);
+}
