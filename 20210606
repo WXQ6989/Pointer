@@ -1,0 +1,119 @@
+/*  
+Star Pointer learning project
+This project is base on arduino and stellarium, the goal of this project is as an ABC project to learn the Microcontroller(MCU)
+and its peripherals
+********************************************************************************************************
+
+To understand the comunications between the open source software Stellarium and the Arduino UNO, we need to know:
+ 
+ 1. Meade LX200 protocol, listen on serial port for basic LX200 commands (INDI LX200 Basic) https://www.meade.com/support/LX200CommandSet.pdf
+ 
+ 2. The commend in this protocol we are going to use :GR# :GD# :Q# :Sr :Sd :MS# 
+    Format：#:GR# && #:GD# to get right ascension(RA) and declination(DEC) from the Arduino, need to answer RA as 00:00:00# DEC as -/+00⸮00:00# 
+            :Sr 10:10:10# && #:Sd +76:24:55# send target RA and DEC to the Arduino need to answer 1 to continue 
+ /*=============================================================*/
+/*=============Communicate with Stellarium=====================*/
+//input from stellarium
+char inputChar[20];
+//init Polaris RAHH,RAMM,RASS to visualize the star pointer
+char RAHH[3]="02",RAMM[3]="41",RASS[3]="39";
+//init DECSign,DECDeg,DECMM,DECSS to visualize the star pointer
+char Polaris DECSign[2]="+",DECDeg[3]="89",DECMM[3]="15",DECSS[3]="51";
+//convert RA/DEC into degree
+float RADegree, DECDegree;
+char SIGNtel;
+float DEC_Cal;
+float HA_Cal;
+float Ra_Cal;
+//
+char txRA[10];                     
+char txDEC[11];
+float RAHH_Cal=0;
+float RAMM_Cal=0;
+float RASS_Cal=0;
+float DECDeg_Cal =0;
+float DECMM_Cal=0;
+float DECSS_Cal=0;
+float DEC_Cal1=0;
+float Ra_Cal1=0;
+
+
+void COMLX200(){// Arduino communicate with Stellarium by LX200 protocol
+  if(Serial.available()){
+    int i= 0;
+    //read out the command from Stellarium
+    inputChar[i++]= Serial.read();
+    //oled.setCursor(0, 1);
+    //oled.print(inputChar);
+    delay(5);
+    //waiting 
+    while((inputChar[i++]=Serial.read()) != '#'){
+      delay(5);
+    }
+    
+    // send current RA to Stellarium RA #:GR#
+    if(inputChar[1]==':' && inputChar[2]=='G' && inputChar[3]=='R' && inputChar[4]=='#'){
+      made();
+      Serial.print(txRA);
+    }
+    
+    //send current DEC to Stellarium DEC #:GD#
+    if(inputChar[1]==':' && inputChar[2]=='G' && inputChar[3]=='D' && inputChar[4]=='#'){
+     made();
+     Serial.print(txDEC);
+    }
+    
+    // get ":Q#"
+    if(inputChar[1]==':' && inputChar[2]=='Q' && inputChar[3]=='#'){
+      //Do nothing with Stellarium
+    }
+    
+    // Arduino get target RA when user type ctrl+1 :Sr10:10:10#  no blanks after :Sr 
+    if(inputChar[0]==':' && inputChar[1]=='S' && inputChar[2]=='r'){
+      // answer 1 continue
+      Serial.print("1");
+      // get the string
+      RAHH[0]=inputChar[3];
+      RAHH[1]=inputChar[4];
+      RAMM[0]=inputChar[6];
+      RAMM[1]=inputChar[7];
+      RASS[0]=inputChar[9];
+      RASS[1]=inputChar[10];
+    }
+    
+    // Arduino get target DEC when user type ctrl+1 #:Sd +76:24:55# 
+    if(inputChar[0]==':' && inputChar[1]=='S' && inputChar[2]=='d'){
+      // answer 1 continue
+      Serial.print("1");
+      // get the string
+      DECSign[0]=inputChar[3];
+      DECDeg[0]=inputChar[4];
+      DECDeg[1]=inputChar[5];
+      DECMM[0]=inputChar[7];
+      DECMM[1]=inputChar[8];
+      DECSS[0]=inputChar[10];
+      DECSS[1]=inputChar[11];  
+    }
+    
+    //:MS# Slew to Target Object
+    if(inputChar[0]==':' && inputChar[1]=='M' && inputChar[2]=='S' && inputChar[3]=='#'){    
+      //RETURNS 0 means OK
+      Serial.print("0");  
+      //update RADEC string into float
+    } 
+  }
+}
+
+
+
+void getRADEC_to_Degree(){//Convert string to float
+  //RAHH in char, get RA in Degree which is hour *15, one hour = 15 degrees
+  RADegree = (atof(RAHH) + (atof(RAMM)/60) +(atof(RASS)/3600)) *15;   // degrees in decimal
+  
+  //get DEC in Degree
+  DECDegree = (atof(DECDeg) + atof(DECMM)/60 + atof(DECSS)/3600);  // degrees in decimal
+  //Convert to negative when it is negative
+  if (DECSign[0] == '-'){
+    DECDegree = 0- DECDegree;
+  }
+}          
